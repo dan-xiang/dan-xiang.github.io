@@ -1,7 +1,7 @@
 ---
 layout: publications
 title: Publications
-slug: /publications
+slug: /research
 publications:
 
 - title: Lazy estimation of variable importance for large neural networks
