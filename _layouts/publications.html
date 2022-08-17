@@ -1,0 +1,41 @@
+---
+layout: default
+---
+
+<!DOCTYPE html>
+<html>
+  <body>
+    <div class="page-content">
+      <div class="wrapper">
+        <div class="work">
+          <h3 class="page-heading">Reserach</h3>
+          {{ content }}
+          {% for item in page.publications %}
+          <div class="work-item">
+            <span class="work-text">
+              <br>
+              <h5>{{ item.title }}</h5>
+              {{ item.authors }}</br>
+              <i>{{ item.conference }}</i></br>
+              {% if item.paperlink != "NA" %}
+                  <a href={{ item.paperlink }} class="current">Paper</a>
+              {% endif %}
+              {% if item.codelink != "NA" %}
+                  <a href={{ item.codelink }} target="_blank"
+                     class="work-button">Code</a>
+              {% endif %}
+                {% if item.slides != "NA" %}
+                  <a href={{ item.slides }} target="_blank"
+                     class="work-button">Slides</a>
+              {% endif %}
+              <br>
+            </span>
+          </div>
+          {% endfor %}
+        </div>
+        <br>
+      </div>
+    </div>
+
+  </body>
+</html>
