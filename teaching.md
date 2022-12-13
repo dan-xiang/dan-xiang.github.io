@@ -6,6 +6,7 @@ layout: default
 ### Teaching / TA
 
 
+
 In Spring and Fall of 2022, I was an instructor for STAT234: Statistical Models and Methods.
 
 In Summer 2022, I was a coach for the PhD qualifying exam preparation, which met weekly to discuss problem sets.
