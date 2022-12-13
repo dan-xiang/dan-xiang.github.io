@@ -3,9 +3,14 @@ layout: default
 ---
 
 
-### Teaching
+### Teaching / TA
 
-My time at UChicago overlapped nicely with the creation of a new data science program. 
-I was lucky to TA and help shape the undergraduate data science course sequence for most of my time in graduate school. 
+In Spring and Fall of 2022, I was an instructor for STAT234: Statistical Models and Methods.
 
-I also designed and taught a data science course as part of the UChicago summer sessions for high school students. 
+In Summer 2022, I was a coach for the PhD qualifying exam preparation, which met weekly to discuss problem sets.
+
+In Winter of 2021, I was a TA for STAT244: Statistical Theory and Methods, taught by Rina Barber.
+
+In Spring of 2021, I was a TA for STAT274: Introduction to Bayesian Data Analysis, taught by Fei Liu.
+
+In Spring 2020, I was an instructor for STAT220: Statistical Methods and Applications, co-taught with Peter McCullagh and Jiacheng Wang.
