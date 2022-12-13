@@ -4,7 +4,7 @@ title: Publications
 slug: /research
 publications:
 
-- title: The edge of discovery: controlling the local false discovery rate at the margin.
+- title: The edge of discovery; controlling the local false discovery rate at the margin.
   authors: Yue Gao*, <b>Abby Stevens</b>*, Garvesh Raskutti, Rebecca Willett
   conference: ICML, 2022
   paperlink: https://proceedings.mlr.press/v162/gao22h.html
