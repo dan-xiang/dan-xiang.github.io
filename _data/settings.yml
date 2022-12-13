@@ -14,10 +14,10 @@ courses:
 - {name: 'Stellar Structures', url: 'stellar-structures'}
 
 social:
-- {icon: 'github', link: 'https://github.com/abbystvns'}
-- {icon: 'google', link: 'https://scholar.google.com/citations?user=9Wn7a2MAAAAJ&hl=en'}
-- {icon: 'instagram', link: 'https://www.instagram.com/abbbyst'}
-- {icon: 'linkedin', link: 'https://www.linkedin.com/in/abbyestevens/'}
+#- {icon: 'github', link: 'https://github.com/abbystvns'}
+#- {icon: 'google', link: 'https://scholar.google.com/citations?user=9Wn7a2MAAAAJ&hl=en'}
+#- {icon: 'instagram', link: 'https://www.instagram.com/abbbyst'}
+- {icon: 'linkedin', link: 'https://www.linkedin.com/in/daniel-xiang-005553142/'}
 
 contacts:
 - {name: 'Dr. Academia',
