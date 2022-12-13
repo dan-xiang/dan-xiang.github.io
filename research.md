@@ -43,12 +43,5 @@ publications:
   codelink: https://github.com/Willett-Group/gtv_forecasting
   slides: NA
 
-- title: Aequitas - A Bias and Fairness Audit Toolkit
-  authors: Pedro Saleiro, Benedict Kuester, Loren Hinkson, Jesse London, <b>Abby Stevens</b>, Ari Anisfeld, 
-           Kit T Rodolfa, Rayid Ghani
-  conference: Center for Data Science and Public Policy, 2018
-  paperlink: https://arxiv.org/pdf/1811.05577.pdf
-  codelink: https://github.com/dssg/aequitas
-  slides: NA
 
 ---
