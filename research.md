@@ -2,7 +2,7 @@
 layout: publications
 title: Publications
 slug: /research
-preprints:
+publications:
 
 - title: The edge of discovery: controlling the local false discovery rate at the margin
   authors: Jake A. Soloff*, Daniel Xiang*, William Fithian
