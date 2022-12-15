@@ -16,3 +16,5 @@ In Winter of 2021, I was a TA for STAT244: Statistical Theory and Methods, taugh
 In Spring of 2021, I was a TA for STAT274: Introduction to Bayesian Data Analysis, taught by Fei Liu.
 
 In Spring 2020, I was an instructor for STAT220: Statistical Methods and Applications, co-taught with Peter McCullagh and Jiacheng Wang.
+
+Statistics and probability visualizations: https://seeing-theory.brown.edu/
