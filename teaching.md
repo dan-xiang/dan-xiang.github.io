@@ -17,4 +17,4 @@ In Spring of 2021, I was a TA for STAT274: Introduction to Bayesian Data Analysi
 
 In Spring 2020, I was an instructor for STAT220: Statistical Methods and Applications, co-taught with Peter McCullagh and Jiacheng Wang.
 
-Statistics and probability visualizations: https://seeing-theory.brown.edu/
+Here are some statistics and probability visualizations that I like to use in class: https://seeing-theory.brown.edu/
