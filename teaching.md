@@ -9,7 +9,7 @@ layout: default
 
 In Spring and Fall of 2022, I was an instructor for STAT234: Statistical Models and Methods.
 
-In Summer of 2022, I was a coach for the theoretical portion of the PhD preliminary exam, meeting weekly with rising second year PhD students.
+In Summer of 2022, I was a coach for the theoretical portion of the PhD preliminary exam, meeting weekly with rising second year PhD students to help prepare for the exam.
 
 In Winter of 2021, I was a TA for STAT244: Statistical Theory and Methods, taught by Rina Barber.
 
