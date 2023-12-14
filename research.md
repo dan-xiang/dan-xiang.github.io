@@ -18,6 +18,11 @@ publications:
   codelink: NA
   slides: NA
 
-
+- title: Sparse-limit approximation for t-statistics
+  authors: Micol Tresoldi, Daniel Xiang, Peter McCullagh
+  conference: Available on arxiv
+  paperlink: https://arxiv.org/abs/2307.01395
+  codelink: NA
+  slides: NA
 
 ---
