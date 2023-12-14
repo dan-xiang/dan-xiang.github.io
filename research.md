@@ -8,7 +8,7 @@ publications:
   authors: Micol Tresoldi, Daniel Xiang, Peter McCullagh
   conference: Available on arxiv
   paperlink: https://arxiv.org/abs/2307.01395
-  codelink: NA
+  codelink: https://github.com/dan-xiang/dan-xiang.github.io/blob/master/sparse-limit-t-statistics.R
   slides: NA
 
 - title: The edge of discovery; controlling the local false discovery rate at the margin.
