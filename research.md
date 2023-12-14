@@ -4,6 +4,13 @@ title: Publications
 slug: /research
 publications:
 
+- title: Sparse-limit approximation for t-statistics
+  authors: Micol Tresoldi, Daniel Xiang, Peter McCullagh
+  conference: Available on arxiv
+  paperlink: https://arxiv.org/abs/2307.01395
+  codelink: NA
+  slides: NA
+
 - title: The edge of discovery; controlling the local false discovery rate at the margin.
   authors: Jake A. Soloff, Daniel Xiang, William Fithian
   conference: Available on arxiv
@@ -15,13 +22,6 @@ publications:
   authors: Daniel Xiang, Peter McCullagh
   conference: Available on arxiv
   paperlink: https://arxiv.org/abs/2009.10902
-  codelink: NA
-  slides: NA
-
-- title: Sparse-limit approximation for t-statistics
-  authors: Micol Tresoldi, Daniel Xiang, Peter McCullagh
-  conference: Available on arxiv
-  paperlink: https://arxiv.org/abs/2307.01395
   codelink: NA
   slides: NA
 
