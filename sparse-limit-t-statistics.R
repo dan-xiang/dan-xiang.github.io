@@ -61,6 +61,7 @@ mixfit <- function(y, alpha, rho=0.05, df2=Inf, maxcycle=10, tol=1.0e-3, div0=1.
 
 # Example computation with scores on 6 d.f. for hivdata z scores
 
+# Click hivdata.RData before running the following code
 hivdat <- log(hivdata)
 treated <- rowMeans(hivdat[,5:8])
 control <- rowMeans(hivdat[,1:4])
