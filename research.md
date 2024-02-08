@@ -13,7 +13,7 @@ publications:
 
 - title: The edge of discovery; controlling the local false discovery rate at the margin.
   authors: Jake A. Soloff, Daniel Xiang, William Fithian
-  conference: Available on arxiv
+  conference: To appear in Annals of Statistics.
   paperlink: https://arxiv.org/abs/2207.07299
   codelink: NA
   slides: NA
