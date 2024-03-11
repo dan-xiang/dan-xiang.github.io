@@ -4,6 +4,13 @@ title: Publications
 slug: /research
 publications:
 
+- title: Interpretation of local false discovery rates under the zero assumption
+  authors: Daniel Xiang, Nikolaos Ignatiadis, Peter McCullagh
+  conference: Available on arxiv
+  paperlink: https://arxiv.org/pdf/2402.08792.pdf
+  codelink: NA
+  slides: NA
+
 - title: Sparse-limit approximation for t-statistics
   authors: Micol Tresoldi, Daniel Xiang, Peter McCullagh
   conference: Available on arxiv
@@ -13,7 +20,7 @@ publications:
 
 - title: The edge of discovery; controlling the local false discovery rate at the margin.
   authors: Jake A. Soloff, Daniel Xiang, William Fithian
-  conference: Available on arxiv
+  conference: To appear in Annals of Statistics.
   paperlink: https://arxiv.org/abs/2207.07299
   codelink: NA
   slides: NA

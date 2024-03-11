@@ -5,7 +5,9 @@ layout: default
 
 ### Teaching / TA
 
+In Winter of 2024, I developed and taught the new course STAT27855: Hypothesis testing with empirical Bayes methods.
 
+In Fall of 2023 and Winter of 2024, I was an instructor for STAT224: Applied Regression Analysis.
 
 In Spring and Fall of 2022, I was an instructor for STAT234: Statistical Models and Methods.
 
