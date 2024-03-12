@@ -13,7 +13,7 @@ publications:
 
 - title: Sparse-limit approximation for t-statistics
   authors: Micol Tresoldi, Daniel Xiang, Peter McCullagh
-  conference: Available on arxiv
+  conference: To appear in Electronic Journal of Statistics.
   paperlink: https://arxiv.org/abs/2307.01395
   codelink: https://github.com/dan-xiang/dan-xiang.github.io/blob/master/sparse-limit-t-statistics.R
   slides: NA
