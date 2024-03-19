@@ -4,6 +4,13 @@ title: Publications
 slug: /research
 publications:
 
+- title: Sharp phase transitions in high-dimensional changepoint detection
+  authors: Daniel Xiang, Chao Gao
+  conference: Available on arxiv
+  paperlink: https://arxiv.org/pdf/2403.11704.pdf
+  codelink: NA
+  slides: NA
+
 - title: Interpretation of local false discovery rates under the zero assumption
   authors: Daniel Xiang, Nikolaos Ignatiadis, Peter McCullagh
   conference: Available on arxiv
