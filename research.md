@@ -20,14 +20,14 @@ publications:
 
 - title: Sparse-limit approximation for t-statistics
   authors: Micol Tresoldi, Daniel Xiang, Peter McCullagh
-  conference: Electronic Journal of Statistics 2024, Vol. 18, No. 1, 1586-1602.
+  conference: Electronic Journal of Statistics, 2024
   paperlink: https://arxiv.org/abs/2307.01395
   codelink: https://github.com/dan-xiang/dan-xiang.github.io/blob/master/sparse-limit-t-statistics.R
   slides: NA
 
 - title: The edge of discovery; controlling the local false discovery rate at the margin.
   authors: Jake A. Soloff, Daniel Xiang, William Fithian
-  conference: To appear in Annals of Statistics.
+  conference: To appear in Annals of Statistics
   paperlink: https://arxiv.org/abs/2207.07299
   codelink: NA
   slides: NA
