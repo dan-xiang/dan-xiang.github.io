@@ -1,0 +1,136 @@
+---
+title: "Plots for non-standard boundary paper"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup,include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library("ggplot2"); theme_set(theme_classic(base_size = 17))
+```
+
+<!-- ###### R code for reproducing figures 1,2 and 4 in non-standard boundary behavior manuscript -->
+
+########### Figure 1: Max-skew Cauchy distribution
+
+```{r,echo=FALSE,warning=FALSE}
+xs <- seq(-2.5,10,length=1000)
+fx <- rep(0,length(xs))
+i <- 1
+for (x in xs) {
+  int_x <- function(t) {
+    1/pi*exp(-t)*cos(t*x+2*t*log(t)/pi)
+  }
+  fx[i] <- integrate(int_x, 0, Inf)
+  i <- i+1
+}
+plot(xs, fx, type="l", xlab="x", ylab="Density")
+legend("topright", legend=c("Max skew Cauchy distribution", 
+                            "with log characteristic function",
+                            "-|t| - 2it log|t| / pi"), 
+       lty=NULL, col="black")
+```
+
+\pagebreak
+########### Figure 2: Extreme Gauss-Cauchy mixture
+
+```{r,echo=FALSE,warning=FALSE}
+x <- seq(-20, 20, length = 1000)
+density <- function(x, theta) {
+  (1 - theta) * dnorm(x) + theta * dcauchy(x)
+}
+density_ratio <- function(x) {
+  dcauchy(x)/dnorm(x)
+}
+plot(x,density(x,2.9218),type="l",ylab="dens")
+legend("topright", legend = expression(paste("Density function of ", F[theta[max]])), bty = "n", cex = 1.40)
+
+```
+
+\pagebreak
+########### Figure 4: Histogram of sum to max ratio (top) and twice the log likelihood divided by the Bartlett factor (bottom)
+
+<!-- # sinkhorn algorithm from https://rdrr.io/github/aaamini/nett/src/R/sinkhorn.R -->
+
+```{r,echo=FALSE,warning=FALSE}
+
+rds_file <- "fig4_histogram_data.rds"
+if (file.exists(rds_file)) {df <- readRDS(rds_file)} else {
+set.seed(3142)
+nsim <- 2000;  nobs <- 10^7
+maxcycle <- 15;  tol <- 1.0e-4
+
+value <- matrix(0, nsim, 8)
+colnames(value) <- c("S", "H(1)", "H(2)", "H(3)", "theta", "FI", "llik", "cycle")
+count <- sim <- 0
+while(sim < nsim){
+   X <- rnorm(nobs)
+   H <- dcauchy(X)/dnorm(X) - 1
+   if((S <- sum(H)) > 0){
+      sim <- sim + 1
+      H <- sort(H, decreasing=TRUE)
+      if(S < H[1]) theta <- S / H[1] /(H[1] - 0.9*S) else theta <- S / sum(H^2)
+      llik0 <- 0
+      for(cycle in 1:maxcycle){
+         deriv <- H / (1 + theta *H)
+         theta <- theta * exp(sum(deriv) / sum(deriv^2) / theta)	# Newton step on log scale
+         llik <- sum(log(1 + theta*H))
+         if(abs(llik - llik0) < tol) break()
+         llik0 <- llik
+         }
+      value[sim,] <- c(S, H[1:3], theta, sum(deriv^2), llik, cycle)
+      }
+   count <- count + 1
+   }
+S <- value[,1];  Hmax <- value[,2];  R <- S/Hmax; H2 <- value[,3];  H3 <- value[,4]; 
+theta <- value[,5]; FI <- value[,6];  llik <- value[,7];  cycle <- value[,8]
+kappa <- 2*mean(llik)
+round(c(nsim/count, 0.5/log(nobs), range(cycle), kappa), 4)	# check on rejection rates,...
+Bn <- nobs / (2*log(nobs))^(3/2);  Tn <- 4*Bn * log(nobs) / pi
+apply(value, 2, median) / c(Tn, Tn, Bn, Bn/2, 1/Tn, Tn^2, 1, 1)		# check limiting behaviour
+
+df <- data.frame(R=R,llik=llik,kappa=kappa)
+saveRDS(df, "fig4_histogram_data.rds") # save the simulation data (takes ~ 20 hrs to produce)
+}
+########################################################################
+###  quantiles, cdf and density of the L-R limit distribution
+qlrlim <- function(u){ -2*u - 2*log(1-u)}
+plrlim <- function(x, maxcycle=3){
+   u <- pchisq(x, df=1)
+   for(cycle in 1:maxcycle){ u <- u - (qlrlim(u) - x) * (1-u)/(2*u) }
+   return(u)
+   }
+dlrlim <- function(x) {return((1/plrlim(x) - 1)/2) }
+###
+chisq <- function(X, fit){
+if(is.vector(X) || is.table(X)){
+   k <- length(X)
+   if(missing(fit)) fit <- rep(mean(X), k) else fit <- fit * sum(X)/sum(fit)
+   X2 <- sum((X - fit)^2 / fit)
+   return(list(X2=X2, df=k-1, tail_p=1-pchisq(X2, df=k-1), fit=fit))
+   }
+if(is.matrix(X)){       # two-way table
+   if(!missing(fit)) fit <- fit * sum(X) / sum(fit)
+   if(missing(fit)) fit <- outer(apply(X, 1, sum), apply(X, 2, sum)) / sum(X)
+   df <- (nrow(X) - 1) * (ncol(X) - 1)
+   X2 <- sum((X - fit)^2 / fit)
+   return(list(X2=X2, df=df, tail_p=1-pchisq(X2, df), fit=fit))
+   }
+return(NA)
+}
+
+par(mfrow=c(1,1), mar=c(5.1, 4.1, 4.1, 2.1))
+hist(df$R, nclass=30, freq=FALSE, main="R = n Zbar/Zmax"); lines(c(0,1), c(1,1), col="blue")
+```
+
+```{r,echo=FALSE,warning=FALSE}
+dx <- 0.01;  x <- seq(0, 3.1, dx);
+hist(sqrt(2*df$llik/df$kappa), nclass=50, xlim=c(0,3), freq=FALSE, main="Sqrt(2*llik/kappa)")
+lines(x, 2*x*dlrlim(x^2), type="l", lwd=2, col="blue");
+lines(x, 2*dnorm(x), lty=2)
+lines(c(-1,4), c(0,0));  lines(c(0,0), c(-1,2))
+legend("topright", legend=c("Limit density of sqrt(2*llik)", "Half-normal density"),
+        lty=c(1, 2), lwd=c(2,1), col=c("blue", "black"), cex=0.8)
+
+```
