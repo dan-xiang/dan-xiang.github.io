@@ -4,6 +4,13 @@ title: Publications
 slug: /research
 publications:
 
+- title: Non-standard boundary behaviour in binary mixture models
+  authors: Heather Battey, Peter McCullagh, Daniel Xiang
+  conference: Available on arxiv
+  paperlink: https://arxiv.org/pdf/2407.20162
+  codelink: NA
+  slides: NA
+
 - title: Sharp phase transitions in high-dimensional changepoint detection
   authors: Daniel Xiang, Chao Gao
   conference: Available on arxiv
