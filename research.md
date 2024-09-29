@@ -4,6 +4,13 @@ title: Publications
 slug: /research
 publications:
 
+- title: A frequentist local false discovery rate
+  authors: Daniel Xiang, Jake Soloff, William Fithian
+  conference: Preprint
+  paperlink: https://github.com/dan-xiang/dan-xiang.github.io/blob/master/frequentist_lfdr/frequentist_lfdr.pdf
+  codelink: NA
+  slides: NA
+
 - title: Non-standard boundary behaviour in binary mixture models
   authors: Heather Battey, Peter McCullagh, Daniel Xiang
   conference: Available on arxiv
