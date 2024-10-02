@@ -11,11 +11,409 @@ library("ggplot2"); theme_set(theme_classic(base_size = 17))
 library(latex2exp)
 library(ramify)
 library(combinat)
+library(devtools)
+devtools::install_github("twbattaglia/MicrobeDS")
+library(phyloseq)
+library(MicrobeDS)
+library(fdrtool)
 ```
 
 <!-- ###### R code for reproducing plots in frequentist lfdr manuscript -->
 
-########### Figure 1: P-value histogram with bFDR estimate
+############ Figure 1: Strimmer's lfdr estimate on microbiome data
+
+```{r,echo=FALSE,warning=FALSE}
+
+rds_file <- "micro-biome-strat-pvals.rds"
+
+if (file.exists(rds_file)) {perm.pvals <- readRDS(rds_file)} else {
+  
+  data('qa10394')
+  # the sample data is available from the data source
+  con <- file("10394_20180418-105453.txt","r")
+  qa_whole_txt <- readLines(con)
+  sample_data_qa10394 <- data.frame(do.call(rbind, strsplit(qa_whole_txt[2:length(qa_whole_txt)], '\t')))
+  colnames(sample_data_qa10394) <- strsplit(qa_whole_txt[1], '\t')[[1]]
+  close(con)
+  
+  
+  names(sample_data_qa10394)
+  
+  OTU <- otu_table(qa10394)
+  
+  colSums(OTU)
+  
+  sample_data_qa10394$sample_name
+  
+  homo.OTU4 <- OTU[,grep("H4.rep.*fresh",colnames(OTU))]
+  homo.OTU2 <- OTU[,grep("H2.rep.*fresh",colnames(OTU))]
+  colSums(homo.OTU4)
+  
+  colnames(OTU)
+  
+  
+  which.nonzero <- which(rowSums(homo.OTU4) > 0 & rowSums(homo.OTU2) > 0)
+  which.lots <- which(rowSums(homo.OTU2 > 0) + rowSums(homo.OTU4 > 0) > 5)
+  
+  grp1 <- OTU[,grep("H[123789].95etoh.rep",colnames(OTU))]
+  grp2 <- OTU[,grep("H[123789].rep.*fresh",colnames(OTU))]
+  #grp1 <- OTU[,grep("H[123456789].95etoh.rep",colnames(OTU))]
+  #grp2 <- OTU[,grep("H[123456789].rep.*fresh",colnames(OTU))]
+  which.lots <- which(rowSums(grp1 > 0) + rowSums(grp2 > 0) > 10)
+  
+  
+  ## stratified permutation test (from ChatGPT)
+  stratified_permutation_test <- function(X, groups, strata, B) {
+    n <- nrow(X)
+    p <- ncol(X)
+    unique_strata <- unique(strata)
+    R <- matrix(NA, n, p)
+    
+    # Compute ranks within each stratum
+    for (s in unique_strata) {
+      idx <- which(strata == s)
+      X_s <- X[idx, , drop = FALSE]
+      ranks_s <- apply(X_s, 2, rank)
+      R[idx, ] <- ranks_s
+    }
+    
+    # Encode groups as +1 and -1
+    groups <- as.factor(groups)
+    group_levels <- levels(groups)
+    if (length(group_levels) != 2) {
+      stop("The 'groups' variable must have exactly two levels.")
+    }
+    groups_coded <- ifelse(groups == group_levels[1], 1, -1)
+    
+    # Compute observed test statistics
+    T_obs <- colSums(R * groups_coded)
+    
+    # Initialize matrix to store permutation test statistics
+    T_perm <- matrix(NA, B, p)
+    
+    # Perform permutations
+    for (b in 1:B) {
+      permuted_g <- rep(NA, n)
+      for (s in unique_strata) {
+        idx <- which(strata == s)
+        permuted_g[idx] <- sample(groups_coded[idx])
+      }
+      T_perm[b, ] <- colSums(R * permuted_g)
+    }
+    
+    # Compute p-values
+    p_values <- (colSums(abs(T_perm) >= matrix(abs(T_obs), nrow = B, ncol = p, byrow = TRUE)) + 1) / (B + 1)
+    
+    # Return a list containing the observed test statistics and p-values
+    return(list(T_obs = T_obs, p_values = p_values))
+  }
+  
+  dim(grp1)
+  
+  counts.table <- t(cbind(grp1, grp2)[which.lots,])
+  rel.counts.table <- t(apply(counts.table, MARGIN = 1, function(x) x/sum(x)))
+  grp.labels <- rep(1:2, c(ncol(grp1), ncol(grp2)))
+  strata <- substr(rownames(rel.counts.table), 7, 9)
+  
+  strat.test <- stratified_permutation_test(rel.counts.table, groups = grp.labels, strata = as.factor(strata), B = 10^4)
+  plot(ecdf(strat.test$p_values))
+  
+  fdrmod <- fdrtool(strat.test$p_values, statistic="pvalue",plot=FALSE,verbose=FALSE)
+  
+  perm.pvals <- strat.test$p_values
+  saveRDS(perm.pvals, "micro-biome-strat-pvals.rds")
+  
+}
+
+
+lfdr_strim <- fdrtool(perm.pvals, statistic="pvalue",plot=FALSE,verbose=FALSE)
+lfdr_est <- lfdr_strim$lfdr
+Fdr_est <- lfdr_strim$qval
+pi0_est <- lfdr_strim$param[3]
+fhat <- pi0_est / lfdr_est
+
+df1 <- data.frame(perm.pvals = perm.pvals, fhat = fhat-pi0_est)
+df2 <- data.frame(perm.pvals = sort(perm.pvals), lfdr_est = sort(lfdr_est), Fdr_est=sort(Fdr_est))
+
+# First plot: Histogram of perm.pvals with null and alternative components
+ggplot(data = df1, aes(x = perm.pvals)) +
+  geom_histogram(aes(y = ..density..), 
+                 breaks = seq(0, 1, length.out = 51),  # 50 bins from 0 to 1
+                 fill = "gray", 
+                 color = "black") +
+  scale_y_continuous(breaks = seq(0, 15, by = 2)) + 
+  scale_x_continuous(limits = c(0, 1),
+                     breaks=seq(0,1,by=0.2)) +  # Ensure the x-axis runs from 0 to 1
+  geom_line(aes(x = sort(perm.pvals), 
+                y = sort(fhat, decreasing = TRUE),
+                color="Alternative component"),
+            size = .65) +
+  coord_cartesian(ylim = c(0, 15)) + 
+  geom_line(aes(x=perm.pvals,
+                y=pi0_est,
+                color="Null component"),
+            linetype="dashed",size=0.65)+
+  labs(x = "p-value", y = "Density") +
+  scale_color_manual(name = "Legend", values = c("Alternative component" = "blue","Null component"="red")) +
+  scale_linetype_manual(values = c("Alternative component" = "solid", 
+                                   "Null component" = "dashed")) +
+  guides(color = guide_legend(override.aes = list(linetype = c("solid", "dashed")))) +
+  theme_minimal() +
+  theme(
+    axis.title = element_text(size = 16),  # Increase axis label size
+    axis.text = element_text(size = 14),   # Increase numeric labels size
+    plot.title = element_text(size = 18, hjust = 0.5),  # Increase title size and center it
+    legend.position = c(0.7, 0.8),  # Place legend inside the plot
+    legend.background = element_blank(),  # Remove legend background
+    legend.title = element_blank(),  # Remove the "Legend" title
+    legend.text = element_text(size = 16),  # Increase font size of legend text
+    legend.spacing = unit(1, "cm"),  # Increase vertical space between legend items
+    legend.key.height = unit(1, "cm"),  # Increase height of the legend keys
+    axis.title.y = element_text(margin = margin(r = 10))
+  )
+
+# Second plot: lfdr and tail fdr versus p-values
+ggplot(data = df2, aes(x = perm.pvals)) +
+  geom_line(aes(y=lfdr_est,color = "lfdr")) +
+  geom_line(aes(y=Fdr_est,color = "tail Fdr"),linetype="dashed",size=0.65) +
+  geom_hline(yintercept = 0, color = "black",size=0.25) +
+  geom_vline(xintercept = 0, color = "black",size=0.25) +
+  labs(#title = "lfdr estimate",
+    x = "p-value", y = "local and tail fdr") +
+  scale_y_continuous(breaks = seq(0, 1, by = .2)) + 
+  #ylim(0,7.5)+
+  scale_x_continuous(breaks = seq(0,1,by=.2)) +  # Ensure the x-axis runs from 0 to 1
+  scale_color_manual(name = "Legend", values = c("lfdr" = "black","tail Fdr"="black")) +
+  scale_linetype_manual(values = c("lfdr" = "solid", 
+                                   "tail Fdr" = "dashed")) +
+  guides(color = guide_legend(override.aes = list(linetype = c("solid", "dashed")))) +
+  theme_minimal() +
+  theme(
+    axis.title = element_text(size = 16),  # Increase axis label size
+    axis.text = element_text(size = 14),   # Increase numeric labels size
+    plot.title = element_text(size = 18, hjust = 0.5),  # Increase title size and center it
+    legend.position = c(0.7, 0.7),  # Place legend inside the plot
+    legend.background = element_blank(),  # Remove legend background
+    legend.title = element_blank(),  # Remove the "Legend" title
+    legend.text = element_text(size = 16),  # Increase font size of legend text
+    legend.spacing = unit(1, "cm"),  # Increase vertical space between legend items
+    legend.key.height = unit(1, "cm")  # Increase height of the legend keys
+  )
+
+
+```
+
+\pagebreak
+############### Figure 2: GGM example: histogram plot
+
+
+```{r,echo=FALSE,warning=FALSE}
+
+d <- 80
+n <- d * 10
+
+set.seed(12)
+m <- choose(d, 2)
+m1 <- ceiling(m * .05)
+non.null.vals <- -(1 + runif(m1)) / sqrt(n) * 2
+
+Theta <- diag(d)
+Theta[upper.tri(Theta)] <- sample(c(non.null.vals, rep(0,m-m1))) * 2
+Theta <- (Theta + t(Theta))/2
+
+Sigma <- solve(Theta)
+
+Z <- matrix(rnorm(n * d), nrow=n)
+X <- Z %*% chol(Sigma)
+
+tstats <- matrix(NA, d, d)
+pvals <- matrix(NA, d, d)
+for(j in 1:d) {
+  mod <- lm(X[,j] ~ 0 + X[,-j])
+  tvals <- summary(mod)$coef[,3]
+  tstats[-j,j] <- tvals
+  pvals[-j,j] <- summary(mod)$coef[,4]
+}
+
+vec.tstats <- tstats[upper.tri(tstats)]
+
+bin.width <- 0.2
+
+# Create the histogram with ggplot
+df <- data.frame(x=vec.tstats)
+
+# Modify the histogram plot with larger axis labels and custom y-axis ticks
+ggplot(data = df, aes(x = x)) +
+  geom_histogram(binwidth = 0.2,
+                 fill = "gray",
+                 color = "black") +
+  xlim(1.8, 4.2) +
+  #ylim(0, dt(2, df = n - d) * m * bin.width * 1.8) +
+  labs(title = "Histogram of t-statistics", 
+       x = "t-statistic", 
+       y = "Count") +
+  stat_function(fun = function(x) dt(x, df = n - d) * (m-m1) * bin.width, 
+                aes(color = "Expected null count"), size = 0.5) +
+  geom_rug(sides = "b", color = "black") +
+  scale_y_continuous(breaks = seq(0, dt(2, df = n - d) * m * bin.width * 1.8, by = 10)) +  # Set y-axis breaks by 10
+  scale_color_manual(name = "Legend", values = c("Expected null count" = "red")) +
+  theme_minimal() +
+  theme(
+    axis.title = element_text(size = 16),  # Increase axis label size
+    axis.text = element_text(size = 14),   # Increase numeric labels size
+    plot.title = element_text(size = 18, hjust = 0.5),  # Increase title size and center it
+    legend.position = c(0.7, 0.8),  # Place legend inside the plot (x, y between 0 and 1)
+    legend.background = element_blank(),  # Remove legend background
+    legend.title = element_blank(),  # Remove the "Legend" title
+    legend.text = element_text(size = 16) 
+  )
+
+```
+
+
+\pagebreak
+################## Figure 3: GGM example, calibration plot
+
+```{r,echo=FALSE,warning=FALSE}
+
+rds_file <- "ggm_d=80_many_iter.rds"
+
+if (file.exists(rds_file)) {data <- readRDS(rds_file)} else {
+
+d <- 80
+n <- d * 10
+
+set.seed(123)
+m <- choose(d, 2)
+pi0 <- 0.95
+m1 <- ceiling(m * (1-pi0))
+non.null.vals <- -(1 + runif(m1)) / sqrt(n) * 2
+Theta <- diag(d)
+Theta[upper.tri(Theta)] <- sample(c(non.null.vals, rep(0,m-m1))) * 2
+Theta <- (Theta + t(Theta))/2
+
+round(Theta,2)[1:10,1:10]
+Sigma <- solve(Theta)
+
+fdp <- function(x,y,H,vals) {
+  R <- sum((vals > x) & (vals < y))
+  V <- sum((vals > x) & (vals < y) & (H==0))
+  if (R>0) return(V/R) else 0
+}
+
+many <- 10^4
+ngrid <- 41
+xgrid <- seq(0,1,length=ngrid)
+calib_p <- rep(NA,ngrid-1)
+calib_q <- rep(NA,ngrid-1)
+calib_l <- rep(NA,ngrid-1)
+pcount_R <- rep(0,ngrid-1)
+pcount_V <- rep(0,ngrid-1)
+qcount_R <- rep(0,ngrid-1)
+qcount_V <- rep(0,ngrid-1)
+lcount_R <- rep(0,ngrid-1)
+lcount_V <- rep(0,ngrid-1)
+
+for (k in 1:many) {
+  print(k)
+  
+  Z <- matrix(rnorm(n * d), nrow=n)
+  X <- Z %*% chol(Sigma)
+  
+  tstats <- matrix(NA, d, d)
+  pvals <- matrix(NA, d, d)
+  for(j in 1:d) {
+    #print(j)
+    mod <- lm(X[,j] ~ 0 + X[,-j])
+    tvals <- summary(mod)$coef[,3]
+    tstats[-j,j] <- tvals
+    pvals[-j,j] <- summary(mod)$coef[,4]
+  }
+  
+  vec.tstats <- tstats[upper.tri(tstats)]
+  
+  H <- (Theta[upper.tri(Theta)] != 0)+0
+  vec.pvals <- pvals[upper.tri(pvals)]
+  
+  qvals <- p.adjust(vec.pvals,method="BH")
+  tmp <- fdrtool(vec.pvals,statistic="pvalue") # strimmer
+  lvals <- tmp$lfdr
+  for (i in 1:(ngrid-1)) {
+    R <- sum((vec.pvals > xgrid[i]) & (vec.pvals < xgrid[i+1]))
+    pcount_R[i] <- pcount_R[i] + R
+    V <- fdp(xgrid[i],xgrid[i+1],H,vec.pvals)*R
+    pcount_V[i] <- pcount_V[i] + V
+    
+    R <- sum((qvals > xgrid[i]) & (qvals < xgrid[i+1]))
+    qcount_R[i] <- qcount_R[i] + R
+    V <- fdp(xgrid[i],xgrid[i+1],H,qvals)*R
+    qcount_V[i] <- qcount_V[i] + V
+    
+    R <- sum((lvals > xgrid[i]) & (lvals < xgrid[i+1]))
+    lcount_R[i] <- lcount_R[i] + R
+    V <- fdp(xgrid[i],xgrid[i+1],H,lvals)*R
+    lcount_V[i] <- lcount_V[i] + V
+  }
+}
+
+for (i in 1:(ngrid-1)) {
+  calib_p[i] <- pcount_V[i]/pcount_R[i]
+  calib_q[i] <- qcount_V[i]/qcount_R[i]
+  calib_l[i] <- lcount_V[i]/lcount_R[i]
+}
+
+centering <- (xgrid[1:(ngrid-1)] + xgrid[2:ngrid])/2
+data <- data.frame(
+  #x = rep(xgrid[1:(ngrid-1)], 3),
+  x = rep(centering, 3),
+  value = c(calib_p, calib_q, calib_l),
+  Statistic = factor(rep(c("p-value", "q-value", "l-value"), 
+                         each = length(xgrid[1:(ngrid-1)])),
+                     levels = c("p-value", "q-value", "l-value"))
+)
+
+saveRDS(data, "ggm_d=80_many_iter.rds") # save the simulation data (takes a while to produce)
+
+}
+
+
+# Creating the ggplot
+p <- ggplot(data, aes(x = x, y = value, color = Statistic)) +
+  geom_point() +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  geom_abline(intercept = 0, slope = 1, linetype = "dashed") +
+  scale_color_manual(
+    name = "Statistic",
+    values = c("p-value" = "black", 
+               "q-value" = "red", 
+               "l-value" = "blue"),
+    labels = c(
+      TeX("p-value"), 
+      TeX("q-value"), 
+      TeX("lfdr estimate")
+    )
+  ) +
+  labs(y = "Fraction of nulls", x = "Reported statistic") +
+  xlim(0, 1) +
+  ylim(0, 1) +
+  theme(
+    aspect.ratio = 1,  # Makes the plot square
+    legend.position = c(0.8, 0.2),  # Positioning the legend inside the plot area
+    legend.background = element_blank(),  # Remove the box around the legend
+    legend.key = element_blank(),  # Remove the background of the legend keys
+    legend.text.align = 0  # Aligns the legend text to the left
+  )
+
+# Display the plot
+print(p)
+
+
+```
+
+\pagebreak
+
+########### Figure 4: P-value histogram with bFDR estimate
 
 ```{r,echo=FALSE,warning=FALSE}
 # load data
@@ -58,7 +456,7 @@ ggplot(df, aes(x=pvals,fill=as.factor(group))) +
 ```
 
 \pagebreak
-########### Figure 2: Broken line plot
+########### Figure 5: Broken line plot
 
 ```{r,echo=FALSE,warning=FALSE}
 
@@ -100,7 +498,7 @@ ggplot(df, aes(x=Fm,y=sort(pvals))) + geom_point() +
 ```
 
 \pagebreak
-########### Figure 3: Scatterplot of clfdr versus mlfdr with m=1000 tests
+########### Figure 6: Scatterplot of clfdr versus mlfdr with m=1000 tests
 
 <!-- # sinkhorn algorithm from https://rdrr.io/github/aaamini/nett/src/R/sinkhorn.R -->
 
@@ -214,8 +612,60 @@ ggplot(df, aes(x = simple_lfdr, y = compound_lfdr, color = realization)) +
   guides(color = guide_legend(override.aes = list(size=4)))
 ```
 
+
+
+
 \pagebreak
-########### Figure 4: Small experiment to illustrate clfdr with m=6 tests
+########### Figure 6: Hockey stick plot
+
+```{r,echo=FALSE,warning=FALSE}
+set.seed(12)
+m <- 500
+a <- 0.05
+b <- 1
+m0 <- 250
+m1 <- m-m0
+pi0 <- m0/m
+H <- c(0,1,rep(0,m0-1),rep(1,m1-1))
+pvals <- rep(0,m)
+pvals[as.logical(H)] <- rbeta(m1,a,b)
+pvals[as.logical(1-H)] <- runif(m0)
+
+df <- data.frame(ord_pvals=sort(pvals),rank=c(1:m),H=as.factor(H[order(pvals)]))
+ggplot(df,aes(x=rank,y=ord_pvals,color=H))+
+  geom_point()+
+  geom_hline(yintercept = 0.1, linetype = "dashed", color = "black") +
+  labs(x="Rank k",y=TeX(r'(Order statistic $p_{(k)}$)'),
+       title="   Comparison of bFDR and FDR")+
+  scale_color_manual(values = c("1" = "blue", "0" = "red"))+
+  theme_minimal()+
+  theme(axis.text = element_text(size = 18),
+        axis.title = element_text(size = 18),
+        plot.title = element_text(size = 18),
+        legend.text = element_text(size = 15),
+        legend.title = element_text(size = 15),
+        legend.position = "none")+
+    annotate("text", x=120, y=0.75,
+             label=TeX(r'(FDR(0,0.1) \approx 9\%)'), parse=TRUE,size=6)+
+    annotate("text", x=120, y=0.6,
+             label=TeX(r'(bFDR(0,0.1) \approx 60\%)'), parse=TRUE,size=6)
+
+###### compute boundary FDR
+# df$num_H <- as.numeric(df$H)-1
+# sum(df$ord_pvals<0.1)
+# sum(1-df$num_H[230:244])/(244-230+1)
+###### compute FDR
+#sum(df$ord_pvals<0.1)
+#sum(1-df$num_H[1:244])/244
+```
+
+
+
+
+
+\pagebreak
+
+########### Figure 7: Small experiment to illustrate clfdr with m=6 tests
 
 ```{r,echo=FALSE,warning=FALSE}
 mat_perm <- function(M) {
@@ -291,7 +741,7 @@ ggplot() +
 ```
 
 \pagebreak
-########### Figure 5: Larger experiment to show clfdr and mlfdr are close to the local FDP
+########### Larger experiment to show clfdr and mlfdr are close to the local FDP (Old manuscript)
 
 ```{r,echo=FALSE,warning=FALSE}
 rds_file <- "calibration_plot_data.rds"
@@ -351,46 +801,3 @@ ggplot(data = dat, aes(x = pvals)) +
         legend.text = element_text(size = 20))
 ```
 
-\pagebreak
-########### Figure 6: Hockey stick plot
-
-```{r,echo=FALSE,warning=FALSE}
-set.seed(12)
-m <- 500
-a <- 0.05
-b <- 1
-m0 <- 250
-m1 <- m-m0
-pi0 <- m0/m
-H <- c(0,1,rep(0,m0-1),rep(1,m1-1))
-pvals <- rep(0,m)
-pvals[as.logical(H)] <- rbeta(m1,a,b)
-pvals[as.logical(1-H)] <- runif(m0)
-
-df <- data.frame(ord_pvals=sort(pvals),rank=c(1:m),H=as.factor(H[order(pvals)]))
-ggplot(df,aes(x=rank,y=ord_pvals,color=H))+
-  geom_point()+
-  geom_hline(yintercept = 0.1, linetype = "dashed", color = "black") +
-  labs(x="Rank k",y=TeX(r'(Order statistic $p_{(k)}$)'),
-       title="   Comparison of bFDR and FDR")+
-  scale_color_manual(values = c("1" = "blue", "0" = "red"))+
-  theme_minimal()+
-  theme(axis.text = element_text(size = 18),
-        axis.title = element_text(size = 18),
-        plot.title = element_text(size = 18),
-        legend.text = element_text(size = 15),
-        legend.title = element_text(size = 15),
-        legend.position = "none")+
-    annotate("text", x=120, y=0.75,
-             label=TeX(r'(FDR(0,0.1) \approx 9\%)'), parse=TRUE,size=6)+
-    annotate("text", x=120, y=0.6,
-             label=TeX(r'(bFDR(0,0.1) \approx 60\%)'), parse=TRUE,size=6)
-
-###### compute boundary FDR
-# df$num_H <- as.numeric(df$H)-1
-# sum(df$ord_pvals<0.1)
-# sum(1-df$num_H[230:244])/(244-230+1)
-###### compute FDR
-#sum(df$ord_pvals<0.1)
-#sum(1-df$num_H[1:244])/244
-```
