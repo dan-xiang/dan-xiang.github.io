@@ -1,0 +1,13 @@
+---
+title: "STAT 234 Lab 1"
+author: "Student's name goes here"
+output: pdf_document
+---
+
+Hello! World. 
+
+This is my first R Markdown document. 
+
+```{r}
+plot(sunspot.month)
+```
