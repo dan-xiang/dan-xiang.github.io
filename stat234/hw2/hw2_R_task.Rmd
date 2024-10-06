@@ -1,5 +1,5 @@
 ---
-title: "STAT 234 Lab 1"
+title: "STAT 234 HW 2"
 author: "Student's name goes here"
 output: pdf_document
 ---
