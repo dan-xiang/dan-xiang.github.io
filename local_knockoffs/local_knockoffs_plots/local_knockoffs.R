@@ -671,8 +671,8 @@ if (file.exists(rds_file)) {df_long <- readRDS(rds_file)} else {
       y.sample = function(X) X %*% beta + rnorm(n)
       y = y.sample(X)
       alpha=q
-      result = knockoff.filter(X, y, knockoffs = create.fixed, statistic = stat.glmnet_lambdasmax,fdr=alpha)
-      #result = knockoff.filter(X, y, knockoffs = create.fixed, statistic = stat.lasso_lambdasmax,fdr=alpha)
+      #result = knockoff.filter(X, y, knockoffs = create.fixed, statistic = stat.glmnet_lambdasmax,fdr=alpha)
+      result = knockoff.filter(X, y, knockoffs = create.fixed, statistic = stat.lasso_lambdasmax,fdr=alpha)
       #result = knockoff.filter(X, y, knockoffs = create.fixed, statistic =  stat.lasso_lambdadiff,fdr=alpha)
       #result = knockoff.filter(X, y, knockoffs = create.fixed, statistic = stat.glmnet_lambdadiff,fdr=alpha)
       #result = knockoff.filter(X, y, knockoffs = create.fixed, statistic = stat.lasso_coefdiff,fdr=alpha)
@@ -730,7 +730,7 @@ ggplot(df_long, aes(x = q, y = value, color = variable, linetype = variable)) +
   geom_line(data = subset(df_long, variable == "bFDR_local_kn"), aes(x = q, y = value, color = variable), size = 0.5, show.legend = FALSE) +  # connect dots
   geom_line(data = subset(df_long, variable == "bFDR_trimmed_kn"), aes(x = q, y = value, color = variable), size = 0.5,linetype = "solid", show.legend = FALSE) +  # connnect dots
   geom_abline(slope = 1, intercept = 0, linetype = "dashed") +  # Add the dotted diagonal line
-  labs(title = "Correlated case",
+  labs(title = "Lasso lambda sign max (correlated predictors)",
        x = "q",
        y = "bFDR(q)",
        color = "Variable") +
@@ -797,8 +797,8 @@ if (file.exists(rds_file)) {df_long <- readRDS(rds_file)} else {
       y.sample = function(X) X %*% beta + rnorm(n)
       y = y.sample(X)
       alpha=q
-      result = knockoff.filter(X, y, knockoffs = create.fixed, statistic = stat.glmnet_lambdasmax,fdr=alpha)
-      #result = knockoff.filter(X, y, knockoffs = create.fixed, statistic = stat.lasso_lambdasmax,fdr=alpha)
+      #result = knockoff.filter(X, y, knockoffs = create.fixed, statistic = stat.glmnet_lambdasmax,fdr=alpha)
+      result = knockoff.filter(X, y, knockoffs = create.fixed, statistic = stat.lasso_lambdasmax,fdr=alpha)
       #result = knockoff.filter(X, y, knockoffs = create.fixed, statistic =  stat.lasso_lambdadiff,fdr=alpha)
       #result = knockoff.filter(X, y, knockoffs = create.fixed, statistic = stat.glmnet_lambdadiff,fdr=alpha)
       #result = knockoff.filter(X, y, knockoffs = create.fixed, statistic = stat.lasso_coefdiff,fdr=alpha)
@@ -856,7 +856,7 @@ ggplot(df_long, aes(x = q, y = value, color = variable, linetype = variable)) +
   geom_line(data = subset(df_long, variable == "bFDR_local_kn"), aes(x = q, y = value, color = variable), size = 0.5, show.legend = FALSE) +  # connect dots
   geom_line(data = subset(df_long, variable == "bFDR_trimmed_kn"), aes(x = q, y = value, color = variable), size = 0.5,linetype = "solid", show.legend = FALSE) +  # connnect dots
   geom_abline(slope = 1, intercept = 0, linetype = "dashed") +  # Add the dotted diagonal line
-  labs(title = "Independent case",
+  labs(title = "Lasso lambda sign max",
        x = "q",
        y = "bFDR(q)",
        color = "Variable") +
@@ -880,6 +880,131 @@ ggplot(df_long, aes(x = q, y = value, color = variable, linetype = variable)) +
   )
 
 
+
+
+
+###### W = lambda sign max in Lasso model
+
+############### iid entries of X
+
+
+rds_file <- "trimmed-lockn-bFDR-Lasso-lambdadiff.rds"
+
+if (file.exists(rds_file)) {df_long <- readRDS(rds_file)} else {
+  
+  set.seed(1)
+  # Problem parameters
+  n = 150
+  p = 64
+  s = 16
+  amplitude = 4.5   # signal amplitude
+  
+  # Generate the variables from a multivariate normal distribution
+  rho = 0 # 0.6
+  Sigma = toeplitz(rho^(0:(p-1)))
+  N <- 10^4
+  m <- 20
+  qs <- seq(1/m,1,length=m)
+  bFDR_local_kn <- rep(NA,m)
+  se_local_kn <- rep(NA,m)
+  bFDR_trimmed_kn <- rep(NA,m)
+  se_trimmed_kn <- rep(NA,m)
+  count <- 0
+  for (q in qs) {
+    count <- count + 1
+    print(count)
+    bFDR <- rep(NA,N)
+    lfdr_bdry <- rep(NA,N)
+    for (k in 1:N) {
+      #print(k)
+      X = matrix(rnorm(n*p),n)  %*% chol(Sigma)
+      # Generate the response from a linear model
+      nonzero = sample(p, s)
+      beta = amplitude * (1:p %in% nonzero) / sqrt(n)
+      y.sample = function(X) X %*% beta + rnorm(n)
+      y = y.sample(X)
+      alpha=q
+      #result = knockoff.filter(X, y, knockoffs = create.fixed, statistic = stat.glmnet_lambdasmax,fdr=alpha)
+      #result = knockoff.filter(X, y, knockoffs = create.fixed, statistic = stat.lasso_lambdasmax,fdr=alpha)
+      result = knockoff.filter(X, y, knockoffs = create.fixed, statistic =  stat.lasso_lambdadiff,fdr=alpha)
+      #result = knockoff.filter(X, y, knockoffs = create.fixed, statistic = stat.glmnet_lambdadiff,fdr=alpha)
+      #result = knockoff.filter(X, y, knockoffs = create.fixed, statistic = stat.lasso_coefdiff,fdr=alpha)
+      W <- result$statistic
+      js <- 1:p
+      inds <- order(abs(result$statistic))
+      # compute boundary FDR for local knock-offs
+      b <- (1-sign(rev(W[inds]))) / 2
+      Bk <- cumsum(b)
+      Zk <- 1/(1+alpha) + Bk - c(1:p)*alpha/(1+alpha)
+      R <- if (sum(Zk<0)>0) which.min(Zk) else 0
+      bFDR[k] <- if (R>0) 1-(rev(beta[inds])[R] != 0) else 0
+      n_pos <- sum(W>0)
+      r <- sum(1-b[1:R])
+      W_bdry <- if (r > 0) W[W>0][order(W[W>0])][n_pos-r+1] else Inf
+      bdry_ind <- if (W_bdry < Inf) which(rev(W[inds])==W_bdry)[1] else 0
+      lfdr_bdry[k] <- if (bdry_ind > 0) {
+        # if bdry_ind == p, then set bdry_int <- bdry_ind - 1
+        while(pava(c(1,b[min(p,(bdry_ind+1)):p]))[1] > alpha/(1+alpha) || b[bdry_ind]==1) {
+          bdry_ind <- bdry_ind - 1
+          if (bdry_ind == 0) break
+        }
+        # check the null status of the last 0 in the rejection set
+        rej_inds <- which(rev(b[inds])[1:bdry_ind]==0)
+        last_rej <- if (length(rej_inds) > 0) max(rej_inds) else 0
+        if (last_rej > 0) 1-(rev(beta[inds])[last_rej] != 0) else 0
+      } else 0
+    }
+    bFDR_local_kn[count] <- mean(bFDR)
+    se_local_kn[count] <- sd(bFDR)/sqrt(N)
+    bFDR_trimmed_kn[count] <- mean(lfdr_bdry)
+    se_trimmed_kn[count] <- sd(lfdr_bdry)/sqrt(N)
+  }
+  
+  bFDR_trimmed_kn
+  se_trimmed_kn
+  df <- data.frame(bFDR_local_kn = bFDR_local_kn,
+                   bFDR_trimmed_kn = bFDR_trimmed_kn,
+                   q = qs)
+  
+  # Reshape the data to long format
+  df_long <- df %>%
+    pivot_longer(cols = c(bFDR_local_kn,bFDR_trimmed_kn), names_to = "variable", values_to = "value")
+  
+  saveRDS(df_long, "trimmed-lockn-bFDR-Lasso-lambdadiff.rds")
+  
+}
+
+# Plot using ggplot2
+ggplot(df_long, aes(x = q, y = value, color = variable, linetype = variable)) +
+  geom_vline(xintercept = 0, linetype = "solid", color = "black",size=0.35) +  
+  geom_hline(yintercept = 0, linetype = "solid", color = "black",size=0.35) + 
+  geom_point(data = subset(df_long, variable == "bFDR_local_kn"), aes(x = q, y = value), size = 1) +  # Plot bFDR_pred as a line
+  geom_point(data = subset(df_long, variable == "bFDR_trimmed_kn"), aes(x = q, y = value), size= 1) +  # Plot bFDR_true as points
+  geom_line(data = subset(df_long, variable == "bFDR_local_kn"), aes(x = q, y = value, color = variable), size = 0.5, show.legend = FALSE) +  # connect dots
+  geom_line(data = subset(df_long, variable == "bFDR_trimmed_kn"), aes(x = q, y = value, color = variable), size = 0.5,linetype = "solid", show.legend = FALSE) +  # connnect dots
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed") +  # Add the dotted diagonal line
+  labs(title = "Lasso lambda difference",
+       x = "q",
+       y = "bFDR(q)",
+       color = "Variable") +
+  scale_color_manual(values = c("bFDR_local_kn" = "red", "bFDR_trimmed_kn" = "blue"),
+                     labels = c("bFDR_local_kn" = "Local knockoffs+", 
+                                "bFDR_trimmed_kn" = "Trimmed knockoffs+")) +
+  theme_minimal()+
+  ylim(0, 1) + 
+  theme(
+    plot.title = element_text(size = 20),  # Increase title size
+    axis.title.x = element_text(size = 16),  # Increase x-axis label size
+    axis.title.y = element_text(size = 16),
+    axis.text.x = element_text(size = 14),   # Increase x-axis numbers size
+    axis.text.y = element_text(size = 14),
+    #legend.text = element_text(size = 16),   # Increase legend text size
+    legend.title = element_blank(), # Increase y-axis label size
+    #legend.position = c(0.75, 0.3),
+    legend.position = "none", # remove legend
+    legend.spacing = unit(1, "cm"),
+    legend.key.height = unit(1, "cm")
+  )
 
 
 
