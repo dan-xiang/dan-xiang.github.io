@@ -6,7 +6,7 @@ publications:
 
 - title: A frequentist local false discovery rate
   authors: Daniel Xiang, Jake Soloff, William Fithian
-  conference: Preprint
+  conference: Available on arxiv
   paperlink: https://arxiv.org/pdf/2502.16005
   codelink: NA
   slides: NA
