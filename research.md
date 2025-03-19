@@ -20,7 +20,7 @@ publications:
 
 - title: Sharp phase transitions in high-dimensional changepoint detection
   authors: Daniel Xiang, Chao Gao
-  conference: To appear in Bernoulli, 2025+
+  conference: Available on arxiv
   paperlink: https://arxiv.org/pdf/2403.11704.pdf
   codelink: NA
   slides: NA
