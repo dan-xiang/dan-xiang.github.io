@@ -28,7 +28,7 @@ publications:
 - title: Interpretation of local false discovery rates under the zero assumption
   authors: Daniel Xiang, Nikolaos Ignatiadis, Peter McCullagh
   conference: Available on arxiv
-  paperlink: https://arxiv.org/pdf/2402.08792.pdf
+  paperlink: https://arxiv.org/pdf/2402.08792
   codelink: NA
   slides: NA
 
