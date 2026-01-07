@@ -4,6 +4,13 @@ title: Publications
 slug: /research
 publications:
 
+- title: Conformal novelty detection with false discovery rate control at the boundary
+  authors: Zijun Gao, Etienne Roquain, Daniel Xiang
+  conference: Available on arxiv
+  paperlink: https://arxiv.org/abs/2601.02610
+  codelink: NA
+  slides: NA
+
 - title: A frequentist local false discovery rate
   authors: Daniel Xiang, Jake Soloff, William Fithian
   conference: Biometrika, 2025
