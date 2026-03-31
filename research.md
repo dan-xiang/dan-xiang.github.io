@@ -4,6 +4,13 @@ title: Publications
 slug: /research
 publications:
 
+- title: Adaptive procedures for boundary FDR control
+  authors: Sarah Mostow, Daniel Xiang
+  conference: Available on arxiv
+  paperlink: https://arxiv.org/pdf/2603.26955
+  codelink: NA
+  slides: NA
+
 - title: Conformal novelty detection with false discovery rate control at the boundary
   authors: Zijun Gao, Etienne Roquain, Daniel Xiang
   conference: Available on arxiv
