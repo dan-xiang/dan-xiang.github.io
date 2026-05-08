@@ -4,9 +4,23 @@ title: Publications
 slug: /research
 publications:
 
+- title: Adaptive procedures for boundary FDR control
+  authors: Sarah Mostow, Daniel Xiang
+  conference: Available on arxiv
+  paperlink: https://arxiv.org/pdf/2603.26955
+  codelink: NA
+  slides: NA
+
+- title: Conformal novelty detection with false discovery rate control at the boundary
+  authors: Zijun Gao, Etienne Roquain, Daniel Xiang
+  conference: Available on arxiv
+  paperlink: https://arxiv.org/abs/2601.02610
+  codelink: NA
+  slides: NA
+
 - title: A frequentist local false discovery rate
   authors: Daniel Xiang, Jake Soloff, William Fithian
-  conference: To appear in Biometrika
+  conference: Biometrika, 2025
   paperlink: https://arxiv.org/pdf/2502.16005
   codelink: NA
   slides: NA
@@ -20,7 +34,7 @@ publications:
 
 - title: Sharp phase transitions in high-dimensional changepoint detection
   authors: Daniel Xiang, Chao Gao
-  conference: To appear in Bernoulli
+  conference: Bernoulli, 2026
   paperlink: https://arxiv.org/pdf/2403.11704.pdf
   codelink: NA
   slides: NA
