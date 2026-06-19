@@ -27,7 +27,7 @@ publications:
 
 - title: A frequentist local false discovery rate
   authors: Daniel Xiang, Jake Soloff, William Fithian
-  conference: Biometrika, 2025
+  conference: Biometrika, 2026
   paperlink: https://arxiv.org/abs/2502.16005
   codelink: NA
   slides: NA
