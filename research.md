@@ -4,6 +4,13 @@ title: Publications
 slug: /research
 publications:
 
+- title: Hierarchical Bayesian estimation of covariance matrices
+  authors: Daniel Xiang, Malgorzata Bogdan, Jonas Wallin, Daniel Yekutieli
+  conference: Available on arxiv
+  paperlink: https://arxiv.org/abs/2606.24751
+  codelink: NA
+  slides: NA
+
 - title: Estimating the local false discovery rate under an unknown symmetric null
   authors: Daniel Xiang, William Fithian, Nikolaos Ignatiadis, Jake A. Soloff, Asaf Weinstein
   conference: Available on arxiv
