@@ -25,7 +25,7 @@ publications:
   codelink: NA
   slides: NA
 
-- title: Conformal novelty detection with false discovery rate control at the boundary
+- title: Reliable conformal novelty detection at the decision boundary
   authors: Zijun Gao, Etienne Roquain, Daniel Xiang
   conference: Available on arxiv
   paperlink: https://arxiv.org/abs/2601.02610
