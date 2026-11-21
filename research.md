@@ -5,7 +5,7 @@ slug: /research
 publications:
 
 - title: Hierarchical Bayesian estimation of covariance matrices
-  authors: Daniel Xiang, Malgorzata Bogdan, Jonas Wallin, Daniel Yekutieli
+  authors: Daniel Yekutieli, Daniel Xiang, Jonas Wallin, Malgorzata Bogdan
   conference: Available on arxiv
   paperlink: https://arxiv.org/abs/2606.24751
   codelink: NA
